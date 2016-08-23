@@ -70,7 +70,7 @@ public class WordFrequencyCounterApp {
             try {
                 System.out.println("Enter the word frequency threshold:- ");
                 threshold = console.nextInt();
-                if (threshold > MIN_THRESHOLD)
+                if (threshold >= MIN_THRESHOLD)
                     break;
                 else
                     throw new IndexOutOfBoundsException();
