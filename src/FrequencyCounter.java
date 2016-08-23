@@ -1,3 +1,5 @@
+import com.sun.javaws.exceptions.InvalidArgumentException;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -14,42 +16,88 @@ public class FrequencyCounter {
 
     public static final int MIN_THRESHOLD = 1;
 
-    FileReader fileReader;
-    Scanner inputText;
     int threshold;
     Map<String, Integer> frquencyMap;
+    File inputFile;
 
-    public void setThreshold(int threshold) {
-        this.threshold = threshold;
+    public FrequencyCounter(File file, int threshold) throws IOException {
+
+        setInputFile(file);
+        setThreshold(threshold);
+        frquencyMap = populateMap();
+
     }
 
-    public void setFileReader(FileReader fileReader)
-    {
-        this.fileReader = fileReader;
-        frquencyMap = readFile();
+    public int getThreshold() {
+        return threshold;
     }
 
-    public FrequencyCounter(File file, int threshold) throws FileNotFoundException {
+    public File getInputFile() {
+        return inputFile;
+    }
 
-        if(file == null)
+    public Map<String, Integer> getFrquencyMap() {
+        return frquencyMap;
+    }
+
+    public void setInputFile(File inputFile) throws IOException {
+
+        if(inputFile == null) {
             throw new NullPointerException("File cannot be null");
-
-        if(threshold < MIN_THRESHOLD) {
-            throw new InvalidParameterException("Value of threshold cannot be negative");
         }
 
-        fileReader = new FileReader(file);
-        inputText = new Scanner(fileReader);
-        this.threshold = threshold;
+        if(!isFileExisting(inputFile)) {
+            throw new FileNotFoundException("File does not exist or Incorrect path");
+        }
 
-        frquencyMap = readFile();
+        if(isFileDirectory(inputFile)) {
+            throw new FileNotFoundException("File is a directory, cannot proceed");
+        }
 
-        //assert this.threshold >= MIN_THRESHOLD : "Threshold cannot be less than zero";
+        if(isFileEmpty(inputFile)) {
+            throw new IOException("File is empty");
+        }
 
+        this.inputFile = inputFile;
+        frquencyMap = populateMap();
     }
 
-    private Map<String,Integer> readFile()
-    {
+    public void setThreshold(int threshold) {
+
+        if(threshold < MIN_THRESHOLD) {
+            throw new IllegalArgumentException("Threshold cannot be negative");
+        }
+        this.threshold = threshold;
+    }
+
+
+    private boolean isFileExisting (File file) throws FileNotFoundException{
+        if(!file.exists()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isFileDirectory(File file) throws FileNotFoundException {
+        if(file.isDirectory())
+            return true;
+
+        return false;
+    }
+
+    private boolean isFileEmpty(File file) throws IOException {
+        if(file.length() == 0)
+           return true;
+
+        return false;
+    }
+
+
+    public Map<String,Integer> populateMap() throws IOException {
+        FileReader fileReader = new FileReader(inputFile);
+        Scanner inputText = new Scanner(fileReader);
+
         inputText.useDelimiter("\\s+|\\.\\s|,\\s+|;|\\s+|\\\\s'+|\"|\\.|,|:|;+");
 
         Map<String, Integer> map = new HashMap<>();
@@ -61,9 +109,15 @@ public class FrequencyCounter {
             {
                 map.put(str,map.get(str) + 1);
             }
-            else
-                map.put(str,1);
+            else {
+                map.put(str, 1);
+            }
+
         }
+
+        inputText.close();
+        fileReader.close();
+
         return map;
     }
 
@@ -72,10 +126,8 @@ public class FrequencyCounter {
 
         for (Map.Entry<String, Integer> entry: frquencyMap.entrySet())
         {
-            if (entry.getValue() >=threshold)
+            if (entry.getValue() >= threshold)
                 System.out.println(entry.getKey() + " - " + entry.getValue() + " times");
         }
-
-        fileReader.close();
     }
 }
