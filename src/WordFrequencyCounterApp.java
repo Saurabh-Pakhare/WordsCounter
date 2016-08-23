@@ -1,6 +1,5 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -11,18 +10,33 @@ import java.util.Scanner;
 public class WordFrequencyCounterApp {
 
     private final static Scanner console = new Scanner(System.in);
-    private static final int MIN_THRESHOLD = FrequencyCounter.MIN_THRESHOLD;
+
     public static void main(String[] args) {
+        String filename;
+        File file;
+        int threshold;
+        FrequencyCounter frequencyCounter;
 
-        File file = getInputFile();
-        int threshold = getThreshold();
+        while (true) {
+            try {
+                filename = getFilename();
+                file = getInputFile(filename);
+                threshold = getThreshold();
 
-        FrequencyCounter frequencyCounter = null;
-        try {
-            frequencyCounter = new FrequencyCounter(file, threshold);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+                frequencyCounter = new FrequencyCounter(file, threshold);
+                break;
+
+                } catch (FileNotFoundException e) {
+                    System.err.println(e.getMessage());
+                } catch (IOException e) {
+                    System.err.println(e.getMessage());
+                } catch (IllegalArgumentException e) {
+                    System.err.println(e.getMessage());
+                } catch (InputMismatchException e) {
+                    System.out.println("Threshold shoud be an Integer");
+                }
+            console.nextLine();
+            }
 
         try {
             frequencyCounter.displayResult();
@@ -31,56 +45,28 @@ public class WordFrequencyCounterApp {
         }
     }
 
-    private static File getInputFile() {
+    private static String getFilename()
+    {
+        System.out.println("Enter input file name : ");
+        String filename = console.nextLine();
+        return filename;
+    }
+
+    private static File getInputFile(String filename) {
         File file = null;
 
-        while (true) {
-            try {
-                System.out.println("Enter input file name : ");
-                String inputFilePath = console.nextLine();
-                file = new File(inputFilePath);
-
-                if (!file.exists())
-                    throw new FileNotFoundException();
-
-                if(file.isDirectory())
-                    throw new SecurityException();
-
-                if (file.length() ==0)
-                    throw new Exception();
-
-                break;
-
-            } catch (FileNotFoundException e ) {
-                System.err.println("File doesn't exist or Incorrect path");
-            } catch (SecurityException e) {
-                System.err.println("This is a directory, cannot proceed.");
-            } catch (Exception e ) {
-                System.err.println("File cannot be empty");
-            }
-        }
+        file = new File(filename);
 
         return file;
     }
 
-    private static int getThreshold() {
+
+    public static int getThreshold() {
         int threshold;
 
-        while (true) {
-            try {
-                System.out.println("Enter the word frequency threshold:- ");
-                threshold = console.nextInt();
-                if (threshold >= MIN_THRESHOLD)
-                    break;
-                else
-                    throw new IndexOutOfBoundsException();
+        System.out.println("Enter the word frequency threshold:- ");
+        threshold = console.nextInt();
 
-            } catch (InputMismatchException e) {
-                System.err.println("Threshold should be an Integer");
-            } catch (IndexOutOfBoundsException e) {
-                System.err.println("Threshold cannot be negative");
-            }
-        }
         return threshold;
     }
 }
