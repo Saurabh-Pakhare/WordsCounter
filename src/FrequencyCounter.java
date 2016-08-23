@@ -50,7 +50,7 @@ public class FrequencyCounter {
 
     private Map<String,Integer> readFile()
     {
-        inputText.useDelimiter("\\s+|\\.\\s*|,\\s*|;\\s*|:\\s*|'\\s*|\\?\\s*|!\\s*");
+        inputText.useDelimiter("\\s+|\\.\\s|,\\s+|;|\\s+|\\\\s'+|\"|\\.|,|:|;+");
 
         Map<String, Integer> map = new HashMap<>();
 
